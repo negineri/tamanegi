@@ -3,12 +3,13 @@
 
 import * as PIXI from "pixi.js";
 import GSAP from "gsap";
+import { keyFlag } from "src/keyevent";
 
 const stageWidth = 1920;
 const stageHeight = 1080;
 
 const app = new PIXI.Application({
-  backgroundColor: 0x1099bb,
+  backgroundColor: 0xffffff,
   resizeTo: window,
 });
 
@@ -38,7 +39,7 @@ function draw() {
   app.stage.scale.set(scale, scale);
   app.stage.position.y = (app.view.height - stageHeight * scale) / 2;
   // console.log(app.stage.width, app.stage.height);
-  if (!drawing) {
+  if (!drawing && keyFlag == 1) {
     drawing = true;
     graphic = new PIXI.Graphics();
     graphic.lineStyle(
