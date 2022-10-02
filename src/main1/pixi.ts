@@ -32,6 +32,7 @@ let sentences: Sentence[];
 let nextMs = 0;
 const intervalMs = 400;
 const texts: PIXI.Container[] = [];
+let scene = 0;
 
 const setup = async () => {
   const sentencesData: SentencesJSON = sentencesJsonFile;
@@ -56,8 +57,36 @@ function draw() {
   app.stage.scale.set(scale, scale);
   app.stage.position.y = (app.view.height - stageHeight * scale) / 2;
   // console.log(app.stage.width, app.stage.height);
-
-  if (new Date().getTime() > nextMs) {
+  if (scene == 0 && keyFlag == 1) {
+    scene = 1;
+    const text = sentences[Math.floor(Math.random() * sentences.length)].text();
+    text.x = stageWidth / 2;
+    text.y = stageHeight / 2;
+    text.pivot.x = text.width / 2;
+    text.pivot.y = text.height / 2;
+    text.width = text.width * 1.5;
+    text.height = text.height * 1.5;
+    text.alpha = 0;
+    app.stage.addChild(text);
+    const tl = GSAP.timeline();
+    tl.to(text, {
+      ease: "power2.out",
+      alpha: 255,
+      duration: 6.0,
+      delay: 3.0,
+    }).to(text, {
+      ease: "power2.out",
+      alpha: 0,
+      duration: 4.0,
+      onComplete: () => {
+        scene = 0;
+        nextMs = new Date().getTime() + intervalMs;
+      },
+    });
+    texts.push(text);
+    if (texts.length > 100) app.stage.removeChild(texts.shift());
+  }
+  if (scene == 0 && new Date().getTime() > nextMs) {
     const text = sentences[Math.floor(Math.random() * sentences.length)].text();
     text.x = Math.random() * stageWidth;
     text.y = Math.random() * stageHeight;
