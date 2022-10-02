@@ -2,18 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import * as PIXI from "pixi.js";
-import GSAP from "gsap";
+import GSAP, { random } from "gsap";
 import { keyFlag } from "src/keyevent";
-import bitmapFnt from "assets/biz-udpmincho64/biz-udpmincho64.fnt";
-import bitmapFontImage0 from "assets/biz-udpmincho64/biz-udpmincho64_0.png";
-import bitmapFontImage1 from "assets/biz-udpmincho64/biz-udpmincho64_1.png";
-import bitmapFontImage2 from "assets/biz-udpmincho64/biz-udpmincho64_2.png";
-import bitmapFontImage3 from "assets/biz-udpmincho64/biz-udpmincho64_3.png";
-import bitmapFontImage4 from "assets/biz-udpmincho64/biz-udpmincho64_4.png";
-import bitmapFontImage5 from "assets/biz-udpmincho64/biz-udpmincho64_5.png";
-import bitmapFontImage6 from "assets/biz-udpmincho64/biz-udpmincho64_6.png";
 import sentencesJsonFile from "assets/sentences.json";
-import { Assets } from "@pixi/assets";
+import { SentencesJSON, loadSentences, Sentence } from "./sentences";
 
 const stageWidth = 1920;
 const stageHeight = 1080;
@@ -36,55 +28,47 @@ let count = 0;
 
 let xIni = 0;
 let yIni = 0;
+let sentences: Sentence[];
+let nextMs = 0;
+const intervalMs = 400;
+const texts: PIXI.Container[] = [];
 
-interface SentenceJSON {
-  sentence: string[];
-}
-interface SentencesJSON {
-  sentences: SentenceJSON[];
-}
-
-const fntXmlDoc = new DOMParser().parseFromString(bitmapFnt, "application/xml");
-console.log(fntXmlDoc);
-const bitmapFontTexture0 = PIXI.Texture.from(bitmapFontImage0);
-const bitmapFontTexture1 = PIXI.Texture.from(bitmapFontImage1);
-const bitmapFontTexture2 = PIXI.Texture.from(bitmapFontImage2);
-const bitmapFontTexture3 = PIXI.Texture.from(bitmapFontImage3);
-const bitmapFontTexture4 = PIXI.Texture.from(bitmapFontImage4);
-const bitmapFontTexture5 = PIXI.Texture.from(bitmapFontImage5);
-const bitmapFontTexture6 = PIXI.Texture.from(bitmapFontImage6);
-PIXI.BitmapFont.install(fntXmlDoc, [
-  bitmapFontTexture0,
-  bitmapFontTexture1,
-  bitmapFontTexture2,
-  bitmapFontTexture3,
-  bitmapFontTexture4,
-  bitmapFontTexture5,
-  bitmapFontTexture6,
-]);
-
-const load = async () => {
+const setup = async () => {
   const sentencesData: SentencesJSON = sentencesJsonFile;
+  sentences = loadSentences(sentencesData);
+  nextMs = new Date().getTime() + intervalMs;
+  // Now, we use 'tick' from gsap
+  GSAP.ticker.add(() => {
+    draw();
+    app.ticker.update();
+  });
+
   // const bitmapFntXml = await Assets.load(bitmapFnt);
   // const bitmapFntXml = await window.api.loadFnt();
 
   // console.log(bitmapFntXml);
 };
 
-load();
-
-// Now, we use 'tick' from gsap
-GSAP.ticker.add(() => {
-  draw();
-  app.ticker.update();
-});
-
 function draw() {
+  // console.log(new Date().getTime());
   count += 5.0;
   const scale = app.view.width / stageWidth;
   app.stage.scale.set(scale, scale);
   app.stage.position.y = (app.view.height - stageHeight * scale) / 2;
   // console.log(app.stage.width, app.stage.height);
+
+  if (new Date().getTime() > nextMs) {
+    const text = sentences[Math.floor(Math.random() * sentences.length)].text();
+    text.x = Math.random() * stageWidth;
+    text.y = Math.random() * stageHeight;
+    text.pivot.x = text.width / 2;
+    text.pivot.y = text.height / 2;
+    app.stage.addChild(text);
+    GSAP.to(text, { ease: "power4.out", alpha: 0, duration: 4.0 });
+    texts.push(text);
+    if (texts.length > 100) app.stage.removeChild(texts.shift());
+    nextMs += intervalMs;
+  }
   return;
   if (!drawing && keyFlag == 0) {
     drawing = true;
@@ -105,3 +89,5 @@ function draw() {
     graphic.lineTo(xIni + Math.cos(count) * 20, yIni + Math.sin(count) * 20);
   }
 }
+
+setup();
