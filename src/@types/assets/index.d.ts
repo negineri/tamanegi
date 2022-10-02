@@ -2,3 +2,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
 declare module "*.png";
+declare module "*.fnt";
+declare module "*.json";

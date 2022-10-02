@@ -53,12 +53,18 @@
                 {
                   "html": "./src/main1/index.html",
                   "js": "./src/main1/renderer.ts",
-                  "name": "main1_window"
+                  "name": "main1_window",
+                  "preload": {
+                    "js": "./src/main1/preload.ts"
+                  }
                 },
                 {
                   "html": "./src/main2/index.html",
                   "js": "./src/main2/renderer.ts",
-                  "name": "main2_window"
+                  "name": "main2_window",
+                  "preload": {
+                    "js": "./src/main2/preload.ts"
+                  }
                 }
               ]
             }
@@ -74,7 +80,6 @@
     "@electron-forge/maker-squirrel": "^6.0.0-beta.66",
     "@electron-forge/maker-zip": "^6.0.0-beta.66",
     "@electron-forge/plugin-webpack": "6.0.0-beta.66",
-    "@types/pixi.js": "^5.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vercel/webpack-asset-relocator-loader": "1.7.3",
@@ -91,6 +96,8 @@
     "typescript": "~4.5.4"
   },
   "dependencies": {
+    "@pixi/assets": "^6.5.5",
+    "@pixi/basis": "^6.5.5",
     "electron-squirrel-startup": "^1.0.0",
     "gsap": "^3.11.2",
     "pixi.js": "^6.5.4"

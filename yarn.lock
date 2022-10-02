@@ -499,6 +499,18 @@
   resolved "https://registry.yarnpkg.com/@pixi/app/-/app-6.5.4.tgz#be2379c617f4b78234594a0eafad58294bc4e3ea"
   integrity sha512-/0tpqAurPQI1rUwYITsnU+mpHgWVlmLp6HrAz4uOlaGj3NCKhb3Cedr39ibT1PslMjmFEd2Xqut7Afz8CH58fw==
 
+"@pixi/assets@^6.5.5":
+  version "6.5.5"
+  resolved "https://registry.yarnpkg.com/@pixi/assets/-/assets-6.5.5.tgz#962e6709d287840ea6f60029c3a2295d7e5eeda2"
+  integrity sha512-4XUK/L8wuW++Yglc3AX/HI+WqvhqEWZCMt5pilxbqA5y0JDr86vrt6KmqHPVrTCYGwBjMMWAMHmGsScKQG3OrA==
+  dependencies:
+    "@types/css-font-loading-module" "^0.0.7"
+
+"@pixi/basis@^6.5.5":
+  version "6.5.5"
+  resolved "https://registry.yarnpkg.com/@pixi/basis/-/basis-6.5.5.tgz#cd41b5752fa7e5507e8f6cd8de0de1f59949ab4a"
+  integrity sha512-4zFRtsPpLNV1fNlqQo3wuD8X716oC3jDiHwn4OK2rYn31dacgbFkhdi9vUHh1RM6cy7KoUdgmUl60z7nQn+XCg==
+
 "@pixi/compressed-textures@6.5.4":
   version "6.5.4"
   resolved "https://registry.yarnpkg.com/@pixi/compressed-textures/-/compressed-textures-6.5.4.tgz#03ff9703b2d4de02a8ef49f712458d31f2750bdd"
@@ -760,6 +772,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/css-font-loading-module@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@types/css-font-loading-module/-/css-font-loading-module-0.0.7.tgz#2f98ede46acc0975de85c0b7b0ebe06041d24601"
+  integrity sha512-nl09VhutdjINdWyXxHWN/w9zlNCfr60JUqJbd24YXUuCwgeL0TpFSdElCwb6cxfB6ybE19Gjj4g0jsgkXxKv1Q==
+
 "@types/earcut@^2.1.0":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@types/earcut/-/earcut-2.1.1.tgz#573a0af609f17005c751f6f4ffec49cfe358ea51"
@@ -888,13 +905,6 @@
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
-
-"@types/pixi.js@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@types/pixi.js/-/pixi.js-5.0.0.tgz#3fbd6d9d26cb563a0f2870e0ea767bc62dddf1b8"
-  integrity sha512-yZqQBR043lRBlBZci2cx6hgmX0fvBfYIqFm6VThlnueXEjitxd3coy+BGsqsZ7+ary7O//+ks4aJRhC5MJoHqA==
-  dependencies:
-    pixi.js "*"
 
 "@types/qs@*":
   version "6.9.7"
@@ -4849,7 +4859,7 @@ pify@^3.0.0:
   resolved "https://registry.yarnpkg.com/pify/-/pify-3.0.0.tgz#e5a4acd2c101fdf3d9a4d07f0dbc4db49dd28176"
   integrity sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==
 
-pixi.js@*, pixi.js@^6.5.4:
+pixi.js@^6.5.4:
   version "6.5.4"
   resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-6.5.4.tgz#9289b42215ea9109924f917a333656315fb893d2"
   integrity sha512-TbWqFN6M1ov8a14BxWn/odYeef4g/oVx4ODSm5CWZXIxrLg7d8wnEppeAA5u9hCnX/UNdtugKFLEXWDaOOg/gA==
