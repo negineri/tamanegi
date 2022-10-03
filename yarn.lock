@@ -4859,6 +4859,11 @@ pify@^3.0.0:
   resolved "https://registry.yarnpkg.com/pify/-/pify-3.0.0.tgz#e5a4acd2c101fdf3d9a4d07f0dbc4db49dd28176"
   integrity sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==
 
+pixi-webfont-loader@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/pixi-webfont-loader/-/pixi-webfont-loader-1.0.2.tgz#1b7d6fa2084e3885a3e2f505a10c0c997712d518"
+  integrity sha512-bCHb1pp/TMTN30gu1L2696UXF1ZMTww07iy/p7MPDGWfpsIZP1MMVY5MmdWPasDlePT85JYod98lbOHQonzyjg==
+
 pixi.js@^6.5.4:
   version "6.5.4"
   resolved "https://registry.yarnpkg.com/pixi.js/-/pixi.js-6.5.4.tgz#9289b42215ea9109924f917a333656315fb893d2"

@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import * as PIXI from "pixi.js";
-import GSAP, { random } from "gsap";
+import GSAP from "gsap";
 import { keyFlag } from "src/keyevent";
 import sentencesJsonFile from "assets/sentences.json";
 import { SentencesJSON, loadSentences, Sentence } from "./sentences";
+import { WebfontLoaderPlugin } from "pixi-webfont-loader";
+import bizudpmincho from "assets/BIZUDPMincho-Regular.ttf";
+
+PIXI.Loader.registerPlugin(WebfontLoaderPlugin);
+
+PIXI.Loader.shared.add({ name: "BIZ UDPMincho", url: bizudpmincho });
+PIXI.Loader.shared.load();
 
 const stageWidth = 1920;
 const stageHeight = 1080;
@@ -119,4 +126,6 @@ function draw() {
   }
 }
 
-setup();
+PIXI.Loader.shared.onComplete.once(() => {
+  setup();
+});

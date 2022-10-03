@@ -3,4 +3,4 @@
 
 declare module "*.png";
 declare module "*.fnt";
-declare module "*.json";
+declare module "*.ttf";

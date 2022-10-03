@@ -34,6 +34,7 @@ export class Sentence {
     this.style = new PIXI.TextStyle({
       align: "center",
       wordWrap: true,
+      fontFamily: "BIZ UDPMincho",
     });
     this.sentence = [];
     this.vSentence = [];
