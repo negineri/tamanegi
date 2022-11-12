@@ -45,6 +45,7 @@ const createWindow = (): void => {
 
   // and load the index.html of the app.
   main2Window.loadURL(MAIN2_WINDOW_WEBPACK_ENTRY);
+  main2Window.webContents.openDevTools();
 };
 
 ipcMain.handle("open", (_) => {
