@@ -39,7 +39,7 @@ const createWindow = (): void => {
     width: 800,
     webPreferences: {
       preload: MAIN2_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      // nodeIntegration: true,
+      nodeIntegration: false,
     },
   });
 
