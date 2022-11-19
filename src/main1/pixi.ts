@@ -8,6 +8,8 @@ import sentencesJsonFile from "assets/sentences.json";
 import { SentencesJSON, loadSentences, Sentence } from "./sentences";
 import { WebfontLoaderPlugin } from "pixi-webfont-loader";
 import bizudpmincho from "assets/BIZUDPMincho-Regular.ttf";
+import bgVideo from "assets/video.mp4";
+// import bgVideo from "assets/試作1.mov";
 
 PIXI.Loader.registerPlugin(WebfontLoaderPlugin);
 
@@ -23,6 +25,13 @@ const app = new PIXI.Application({
 });
 
 document.body.appendChild(app.view);
+
+const bgVideoTexture = PIXI.Texture.from(bgVideo, {});
+const bgVideoResource = bgVideoTexture.baseTexture
+  .resource as PIXI.VideoResource;
+bgVideoResource.source.loop = true;
+const bgVideoSprite = new PIXI.Sprite(bgVideoTexture);
+app.stage.addChild(bgVideoSprite);
 
 // We stop Pixi ticker using stop() function because autoStart = false does NOT stop the shared ticker:
 // doc: http://pixijs.download/release/docs/PIXI.Application.html

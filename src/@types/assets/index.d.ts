@@ -5,3 +5,4 @@ declare module "*.png";
 declare module "*.fnt";
 declare module "*.ttf";
 declare module "*.xml";
+declare module "*.mp4";
