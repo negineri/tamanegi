@@ -32,7 +32,7 @@ const createWindow = (): void => {
 
   // Open the DevTools.
   main1Window.webContents.openDevTools();
-
+  /*
   // Create the browser window.
   const main2Window = new BrowserWindow({
     height: 600,
@@ -46,6 +46,7 @@ const createWindow = (): void => {
   // and load the index.html of the app.
   main2Window.loadURL(MAIN2_WINDOW_WEBPACK_ENTRY);
   main2Window.webContents.openDevTools();
+  */
 };
 
 ipcMain.handle("open", (_) => {

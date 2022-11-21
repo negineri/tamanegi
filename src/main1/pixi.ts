@@ -9,6 +9,7 @@ import { SentencesJSON, loadSentences, Sentence } from "./sentences";
 import { WebfontLoaderPlugin } from "pixi-webfont-loader";
 import bizudpmincho from "assets/BIZUDPMincho-Regular.ttf";
 import bgVideo from "assets/video.mp4";
+import cv from "@techstark/opencv-js";
 // import bgVideo from "assets/試作1.mov";
 
 PIXI.Loader.registerPlugin(WebfontLoaderPlugin);
@@ -51,6 +52,81 @@ const texts: PIXI.Container[] = [];
 let scene = 0;
 
 const setup = async () => {
+  const devices = (await navigator.mediaDevices.enumerateDevices())
+    .filter((device) => device.kind === "videoinput")
+    .map((device) => {
+      return {
+        text: device.label,
+        value: device.deviceId,
+      };
+    });
+
+  // const video = document.getElementById("camera") as HTMLVideoElement;
+
+  const video = document.createElement("video") as HTMLVideoElement;
+  video.playsInline = true;
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { deviceId: devices[0]["value"] },
+    audio: false,
+  });
+  video.srcObject = stream;
+
+  video.onloadedmetadata = () => {
+    video.play();
+    // 後程OpenCVで使用するので、表示しないcanvasを用意してそこにvideoの内容を書き写しておく
+    const buffer = document.createElement("canvas");
+    const bufferCtx = buffer.getContext("2d", { willReadFrequently: true });
+
+    // 表示用のcanvasも用意
+    const canvas = document.createElement("canvas") as HTMLCanvasElement;
+    const canvasCtx = canvas.getContext("2d", { willReadFrequently: true });
+
+    canvas.width = buffer.width = video.videoWidth;
+    canvas.height = buffer.height = video.videoHeight;
+    const cameraTexture = PIXI.Texture.from(canvas);
+    const cameraSprite = new PIXI.Sprite(cameraTexture);
+    const scale = stageWidth / canvas.width;
+    cameraSprite.scale.set(scale, scale);
+    app.stage.addChild(cameraSprite);
+    const tick = () => {
+      bufferCtx.drawImage(video, 0, 0);
+      const src = cv.imread(buffer);
+      let gray = new cv.Mat();
+      let dst = new cv.Mat();
+      cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+      cv.threshold(gray, gray, 200, 255, cv.THRESH_BINARY);
+      cv.cvtColor(gray, dst, cv.COLOR_GRAY2RGBA);
+      /*
+      let tgray = gray.data;
+      for (let i = 0; i < gray.data.length; i++) {
+        if (tgray[i] === 255) {
+          dst.data[i * 4 + 3] = 0;
+        }
+      }
+      */
+
+      cv.imshow(canvas, dst);
+      let imageData = canvasCtx.getImageData(0, 0, canvas.width, canvas.height);
+      for (var i = 0; i < imageData.width * imageData.height; i++) {
+        if (
+          imageData.data[i * 4] == 255 &&
+          imageData.data[i * 4 + 1] == 255 &&
+          imageData.data[i * 4 + 2] == 255
+        ) {
+          imageData.data[i * 4 + 3] = 0;
+        }
+      }
+      canvasCtx.putImageData(imageData, 0, 0);
+      // OpenCV.jsはemscriptenでできていて、C++の世界のオブジェクトは自動的に破棄されないため、データ構造を使ったら自分で破棄する必要がある
+      src.delete();
+      gray.delete();
+      dst.delete();
+      cameraTexture.update();
+
+      requestAnimationFrame(tick);
+    };
+    tick();
+  };
   const sentencesData: SentencesJSON = sentencesJsonFile;
   sentences = loadSentences(sentencesData);
   nextMs = new Date().getTime() + intervalMs;
