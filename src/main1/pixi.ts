@@ -90,6 +90,7 @@ const setup = async () => {
     app.stage.addChild(cameraSprite);
     const tick = () => {
       bufferCtx.drawImage(video, 0, 0);
+      /*
       const src = cv.imread(buffer);
       let gray = new cv.Mat();
       let dst = new cv.Mat();
@@ -103,24 +104,35 @@ const setup = async () => {
           dst.data[i * 4 + 3] = 0;
         }
       }
-      */
 
       cv.imshow(canvas, dst);
       let imageData = canvasCtx.getImageData(0, 0, canvas.width, canvas.height);
-      for (var i = 0; i < imageData.width * imageData.height; i++) {
-        if (
-          imageData.data[i * 4] == 255 &&
-          imageData.data[i * 4 + 1] == 255 &&
-          imageData.data[i * 4 + 2] == 255
-        ) {
+      */
+      let imageData = bufferCtx.getImageData(0, 0, buffer.width, buffer.height);
+      for (var i = 0; i < imageData.data.length / 4; i++) {
+        const gray =
+          (imageData.data[i * 4] +
+            imageData.data[i * 4 + 1] +
+            imageData.data[i * 4 + 2]) /
+          3;
+        if (gray > 200) {
+          imageData.data[i * 4] = 255;
+          imageData.data[i * 4 + 1] = 255;
+          imageData.data[i * 4 + 2] = 255;
           imageData.data[i * 4 + 3] = 0;
+        } else {
+          imageData.data[i * 4] = 0;
+          imageData.data[i * 4 + 1] = 0;
+          imageData.data[i * 4 + 2] = 0;
         }
       }
       canvasCtx.putImageData(imageData, 0, 0);
       // OpenCV.jsはemscriptenでできていて、C++の世界のオブジェクトは自動的に破棄されないため、データ構造を使ったら自分で破棄する必要がある
+      /*
       src.delete();
       gray.delete();
       dst.delete();
+      */
       cameraTexture.update();
 
       requestAnimationFrame(tick);
