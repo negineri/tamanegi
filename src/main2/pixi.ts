@@ -1,77 +1,70 @@
 // Copyright 2022 negineri.
 // SPDX-License-Identifier: Apache-2.0
 
-import * as PIXI from "pixi.js";
+import cv from "@techstark/opencv-js";
+import { loadDataFile } from "src/cvDataFile";
+import haarcascade_frontalface_default from "assets/haarcascade_frontalface_default.xml";
+import haarcascade_eye from "assets/haarcascade_eye.xml";
 
-export default class Hilo {
-  window: Window;
-  app: PIXI.Application;
-  constructor(window: Window, body: Document["body"]) {
-    // Adjust the resolution for retina screens; along with
-    // the autoDensity this transparently handles high resolutions
-    PIXI.settings.RESOLUTION = window.devicePixelRatio || 1;
-    this.window = window;
-
-    // The PixiJS application instance
-    this.app = new PIXI.Application({
-      resizeTo: window, // Auto fill the screen
-      autoDensity: true, // Handles high DPI screens
-      backgroundColor: 0xffffff,
+const setup = async () => {
+  const devices = (await navigator.mediaDevices.enumerateDevices())
+    .filter((device) => device.kind === "videoinput")
+    .map((device) => {
+      return {
+        text: device.label,
+        value: device.deviceId,
+      };
     });
 
-    // Add application canvas to body
-    body.appendChild(this.app.view);
+  await loadDataFile(
+    "haarcascade_frontalface_default.xml",
+    haarcascade_frontalface_default
+  );
+  await loadDataFile("haarcascade_eye.xml", haarcascade_eye);
 
-    // Create the scaled stage and then add stuff to it
-    // this.createScaledContainer((container) => {});
-  }
+  // const video = document.getElementById("camera") as HTMLVideoElement;
+  const video = document.createElement("video") as HTMLVideoElement;
+  video.playsInline = true;
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { deviceId: devices[0]["value"] },
+    audio: false,
+  });
+  video.srcObject = stream;
+  // video.play();
 
-  // Clear the stage and create a new scaled container; the
-  // provided callback will be called with the new container
-  createScaledContainer(callback: (container: PIXI.Container) => void) {
-    this.app.stage.removeChildren();
+  video.onloadedmetadata = () => {
+    video.play();
+    // 後程OpenCVで使用するので、表示しないcanvasを用意してそこにvideoの内容を書き写しておく
+    const buffer = document.createElement("canvas");
+    const bufferCtx = buffer.getContext("2d");
 
-    // This is the stage for the new scene
-    const container = new PIXI.Container();
-    container.width = this.WIDTH;
-    container.height = this.HEIGHT;
-    container.scale.x = this.actualWidth() / this.WIDTH;
-    container.scale.y = this.actualHeight() / this.HEIGHT;
-    container.x = this.app.screen.width / 2 - this.actualWidth() / 2;
-    container.y = this.app.screen.height / 2 - this.actualHeight() / 2;
+    // 表示用のcanvasも用意
+    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 
-    // Add the container to the stage and call the callback
-    this.app.stage.addChild(container);
-    callback(container);
-  }
+    canvas.width = buffer.width = video.videoWidth;
+    canvas.height = buffer.height = video.videoHeight;
+    const faceCascade = new cv.CascadeClassifier(
+      "haarcascade_frontalface_default.xml"
+    );
+    const eyeCascade = new cv.CascadeClassifier("haarcascade_eye.xml");
 
-  // These functions are using getters to
-  // simulate constant class variables
+    // この後毎フレームごとに呼ばれる関数
+    const tick = () => {
+      bufferCtx.drawImage(video, 0, 0);
+      const src = cv.imread(buffer);
+      let gray = new cv.Mat();
+      cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+      cv.threshold(gray, gray, 200, 255, cv.THRESH_BINARY);
 
-  get WIDTH() {
-    return 375;
-  }
+      cv.imshow(canvas, src);
+      // OpenCV.jsはemscriptenでできていて、C++の世界のオブジェクトは自動的に破棄されないため、データ構造を使ったら自分で破棄する必要がある
+      src.delete();
+      gray.delete();
 
-  get HEIGHT() {
-    return 667;
-  }
+      requestAnimationFrame(tick);
+    };
+    tick();
+  };
+};
 
-  // The dynamic width and height lets us do some smart
-  // scaling of the main game content; here we're just
-  // using it to maintain a 9:16 aspect ratio and giving
-  // our scenes a 375x667 stage to work with
-
-  actualWidth() {
-    const { width, height } = this.app.screen;
-    const isWidthConstrained = width < (height * 9) / 16;
-    return isWidthConstrained ? width : (height * 9) / 16;
-  }
-
-  actualHeight() {
-    const { width, height } = this.app.screen;
-    const isHeightConstrained = (width * 16) / 9 > height;
-    return isHeightConstrained ? height : (width * 16) / 9;
-  }
-}
-
-new Hilo(window, document.body);
+setup();

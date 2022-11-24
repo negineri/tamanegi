@@ -98,6 +98,7 @@
   "dependencies": {
     "@pixi/assets": "^6.5.5",
     "@pixi/basis": "^6.5.5",
+    "@techstark/opencv-js": "^4.6.0-release.1",
     "electron-squirrel-startup": "^1.0.0",
     "gsap": "^3.11.2",
     "pixi-webfont-loader": "^1.0.2",
