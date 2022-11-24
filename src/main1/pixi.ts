@@ -3,7 +3,7 @@
 
 import * as PIXI from "pixi.js";
 import GSAP from "gsap";
-import { keyFlag } from "src/keyevent";
+import { keyFlag, camNum } from "src/keyevent";
 import sentencesJsonFile from "assets/sentences.json";
 import { SentencesJSON, loadSentences, Sentence } from "./sentences";
 import { WebfontLoaderPlugin } from "pixi-webfont-loader";
@@ -117,7 +117,7 @@ const setupCamera = async (
   const video = document.createElement("video") as HTMLVideoElement;
   video.playsInline = true;
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { deviceId: devices[0]["value"] },
+    video: { deviceId: devices[camNum]["value"] },
     audio: false,
   });
   video.srcObject = stream;

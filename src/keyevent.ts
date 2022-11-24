@@ -17,11 +17,15 @@ window.addEventListener(
 );
 
 export let keyFlag = 0;
+export let camNum = 1;
 
 function downHandler(e: KeyboardEvent) {
   switch (e.key) {
     case "t":
       keyFlag = 1;
+      break;
+    case "0":
+      camNum = 0;
       break;
   }
 }
