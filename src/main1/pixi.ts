@@ -9,7 +9,10 @@ import { SentencesJSON, loadSentences, Sentence } from "./sentences";
 import { WebfontLoaderPlugin } from "pixi-webfont-loader";
 import bizudpmincho from "assets/BIZUDPMincho-Regular.ttf";
 import bgVideo from "assets/video.mp4";
-import cv, { EmscriptenEmbindInstance } from "@techstark/opencv-js";
+import cv, {
+  CameraHelper,
+  EmscriptenEmbindInstance,
+} from "@techstark/opencv-js";
 import { loadDataFile } from "src/cvDataFile";
 import haarcascade_frontalface_default from "assets/haarcascade_frontalface_default.xml";
 import haarcascade_eye from "assets/haarcascade_eye.xml";
@@ -35,6 +38,7 @@ const bgVideoResource = bgVideoTexture.baseTexture
   .resource as PIXI.VideoResource;
 bgVideoResource.source.loop = true;
 const bgVideoSprite = new PIXI.Sprite(bgVideoTexture);
+bgVideoSprite.visible = false;
 // app.stage.addChild(bgVideoSprite);
 
 // We stop Pixi ticker using stop() function because autoStart = false does NOT stop the shared ticker:
@@ -56,13 +60,33 @@ let scene = 0;
 let flags = { tracking: true, detect: false };
 let centralText: PIXI.Container;
 let pScale: number[] = [];
+const cMask = new PIXI.Graphics();
+cMask.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+cMask.beginFill(0x0000000, 1);
+cMask.drawCircle(stageWidth / 2, stageHeight / 2, 420);
+cMask.endFill();
 
 type DataStore = {
   text: PIXI.Container;
   texts: PIXI.Container[];
   bgVideo: PIXI.Container;
+  l1: PIXI.Container;
+  l2: PIXI.Container;
+  mask: PIXI.Graphics;
 };
-const store: DataStore = { text: null, texts: [], bgVideo: bgVideoSprite };
+const store: DataStore = {
+  text: null,
+  texts: [],
+  bgVideo: bgVideoSprite,
+  l1: new PIXI.Container(),
+  l2: new PIXI.Container(),
+  mask: cMask,
+};
+app.stage.addChild(store.l1);
+app.stage.addChild(store.l2);
+store.l2.addChild(bgVideoSprite);
+store.l2.addChild(store.mask);
+store.l2.mask = store.mask;
 
 const setupCamera = async (
   ticker: PIXI.Ticker,
@@ -169,9 +193,38 @@ function draw() {
   if (scene == 0) {
     scene = 1;
     console.log("scene 0");
+    if (keyFlag == 1) {
+      const grid = new PIXI.Graphics();
+
+      // Rectangle
+      const lineWidth = 10;
+      for (let y = 1; y < 6; y++) {
+        scene = -1;
+        grid.beginFill(0x000000);
+        grid.drawRect(
+          0,
+          (stageHeight / 6) * y - lineWidth / 2,
+          stageWidth,
+          lineWidth
+        );
+        grid.endFill();
+      }
+      for (let x = 1; x < 12; x++) {
+        grid.beginFill(0x000000);
+        grid.drawRect(
+          (stageWidth / 12) * x - lineWidth / 2,
+          0,
+          lineWidth,
+          stageHeight
+        );
+        grid.endFill();
+      }
+      app.stage.addChild(grid);
+    }
     // スタンバイ初期化
     if (store.text != null) {
-      app.stage.removeChild(store.text);
+      // app.stage.removeChild(store.text);
+      store.l2.removeChild(store.text);
       store.text = null;
     }
     const text = sentences[Math.floor(Math.random() * sentences.length)].text();
@@ -182,13 +235,14 @@ function draw() {
     text.width = text.width * 1.5;
     text.height = text.height * 1.5;
     text.alpha = 1;
-    app.stage.addChild(text);
+    // app.stage.addChild(text);
+    store.l2.addChild(text);
     store.text = text;
     flags.tracking = true;
   } else if (scene == 1) {
     // スタンバイ
     if (flags.detect) {
-      scene = 2;
+      scene = 3;
       // flags.tracking = false;
       const tl = GSAP.timeline();
       tl.to(store.text, {
@@ -196,7 +250,7 @@ function draw() {
         alpha: 0,
         duration: 4.0,
         onComplete: () => {
-          scene = 3;
+          // scene = 3;
         },
       });
     }
@@ -205,7 +259,7 @@ function draw() {
   } else if (scene == 3) {
     // ドアホンスタンバイ初期化
     scene = 4;
-    app.stage.addChild(store.bgVideo);
+    store.bgVideo.visible = true;
   } else if (scene == 4) {
     // ドアホンスタンバイ
     let keyFlag = 0;
@@ -219,6 +273,12 @@ function draw() {
       }
     }
     if (keyFlag == 1) {
+      for (let index = 0; index < texts.length; index++) {
+        // app.stage.removeChild(texts[index]);
+        store.l2.removeChild(texts[index]);
+        texts[index] = null;
+      }
+      texts.splice(0);
       for (let index = 0; index < 30; index++) {
         const text =
           sentences[Math.floor(Math.random() * sentences.length)].text();
@@ -227,7 +287,8 @@ function draw() {
         text.pivot.x = text.width / 2;
         text.pivot.y = text.height / 2;
         text.alpha = 0;
-        app.stage.addChild(text);
+        // app.stage.addChild(text);
+        store.l2.addChild(text);
         const tl = GSAP.timeline();
         tl.to(text, { alpha: 1, duration: 0, delay: Math.random() * 1 }).to(
           text,
@@ -238,17 +299,12 @@ function draw() {
           }
         );
         texts.push(text);
+        store.bgVideo.visible = false;
       }
-      window.setTimeout(() => (scene = 5), 5000);
+      window.setTimeout(() => (scene = 5), 4000);
     }
   } else if (scene == 5) {
     scene = 0;
-    app.stage.removeChild(store.bgVideo);
-    for (let index = 0; index < texts.length; index++) {
-      app.stage.removeChild(texts[index]);
-      texts[index] = null;
-    }
-    texts.splice(0);
   }
 }
 
