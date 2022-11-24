@@ -20,7 +20,7 @@ export let keyFlag = 0;
 
 function downHandler(e: KeyboardEvent) {
   switch (e.key) {
-    case "a":
+    case "t":
       keyFlag = 1;
       break;
   }

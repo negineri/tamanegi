@@ -20,5 +20,10 @@ module.exports = {
         configFile: "tsconfig.json",
       }),
     ],
+    fallback: {
+      fs: false,
+      path: false,
+      crypto: false,
+    },
   },
 };
