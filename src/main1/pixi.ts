@@ -37,8 +37,6 @@ const bgVideoTexture = PIXI.Texture.from(bgVideo, {});
 const bgVideoResource = bgVideoTexture.baseTexture
   .resource as PIXI.VideoResource;
 bgVideoResource.source.loop = true;
-const bgVideoSprite = new PIXI.Sprite(bgVideoTexture);
-bgVideoSprite.visible = false;
 // app.stage.addChild(bgVideoSprite);
 
 // We stop Pixi ticker using stop() function because autoStart = false does NOT stop the shared ticker:
@@ -55,36 +53,57 @@ let yIni = 0;
 let sentences: Sentence[];
 let nextMs = 0;
 const intervalMs = 400;
-const texts: PIXI.Container[] = [];
+const texts1: PIXI.Container[] = [];
+const texts2: PIXI.Container[] = [];
 let scene = 0;
 let flags = { tracking: true, detect: false };
 let centralText: PIXI.Container;
 let pScale: number[] = [];
 const cMask = new PIXI.Graphics();
 cMask.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
-cMask.beginFill(0x0000000, 1);
+cMask.beginFill(0x000000, 1);
 cMask.drawCircle(stageWidth / 2, stageHeight / 2, 420);
 cMask.endFill();
+const cMaskD = new PIXI.Graphics();
+cMaskD.lineStyle(10, 0x000000, 1); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
+cMaskD.beginFill(0x000000, 0);
+cMaskD.drawCircle(stageWidth / 2, stageHeight / 2, 420);
+cMaskD.endFill();
 
 type DataStore = {
   text: PIXI.Container;
   texts: PIXI.Container[];
-  bgVideo: PIXI.Container;
+  bgVideo1: PIXI.Container;
+  bgVideo2: PIXI.Container;
   l1: PIXI.Container;
+  l1_5: PIXI.Container;
   l2: PIXI.Container;
   mask: PIXI.Graphics;
 };
 const store: DataStore = {
   text: null,
   texts: [],
-  bgVideo: bgVideoSprite,
+  bgVideo1: new PIXI.Sprite(bgVideoTexture),
+  bgVideo2: new PIXI.Sprite(bgVideoTexture),
   l1: new PIXI.Container(),
+  l1_5: new PIXI.Container(),
   l2: new PIXI.Container(),
   mask: cMask,
 };
 app.stage.addChild(store.l1);
+app.stage.addChild(store.l1_5);
 app.stage.addChild(store.l2);
-store.l2.addChild(bgVideoSprite);
+const filter = new PIXI.filters.BlurFilter(70, 8);
+store.l1.filters = [filter];
+store.l1.addChild(store.bgVideo1);
+store.bgVideo1.visible = false;
+const l2Bg = new PIXI.Graphics();
+l2Bg.beginFill(0xffffff, 1);
+l2Bg.drawRect(0, 0, stageWidth, stageHeight);
+l2Bg.endFill();
+store.l2.addChild(l2Bg);
+store.l2.addChild(store.bgVideo2);
+store.bgVideo2.visible = false;
 store.l2.addChild(store.mask);
 store.l2.mask = store.mask;
 
@@ -138,6 +157,7 @@ const setupCamera = async (
     const cameraSprite = new PIXI.Sprite(cameraTexture);
     const scale = stageWidth / canvas.width;
     cameraSprite.scale.set(scale, scale);
+    let camSCount = 0;
     // app.stage.addChild(cameraSprite);
     ticker.add(() => {
       if (!flags.tracking) {
@@ -175,6 +195,35 @@ const setupCamera = async (
 const setup = async () => {
   setupCamera(app.ticker, flags);
 
+  if (false) {
+    const grid = new PIXI.Graphics();
+
+    // Rectangle
+    const lineWidth = 4;
+    for (let y = 1; y < 6; y++) {
+      grid.beginFill(0x000000);
+      grid.drawRect(
+        0,
+        (stageHeight / 6) * y - lineWidth / 2,
+        stageWidth,
+        lineWidth
+      );
+      grid.endFill();
+    }
+    for (let x = 1; x < 12; x++) {
+      grid.beginFill(0x000000);
+      grid.drawRect(
+        (stageWidth / 12) * x - lineWidth / 2,
+        0,
+        lineWidth,
+        stageHeight
+      );
+      grid.endFill();
+    }
+    store.l1_5.addChild(grid);
+    app.stage.addChild(cMaskD);
+  }
+
   const sentencesData: SentencesJSON = sentencesJsonFile;
   sentences = loadSentences(sentencesData);
   nextMs = new Date().getTime() + intervalMs;
@@ -193,34 +242,6 @@ function draw() {
   if (scene == 0) {
     scene = 1;
     console.log("scene 0");
-    if (keyFlag == 1) {
-      const grid = new PIXI.Graphics();
-
-      // Rectangle
-      const lineWidth = 10;
-      for (let y = 1; y < 6; y++) {
-        scene = -1;
-        grid.beginFill(0x000000);
-        grid.drawRect(
-          0,
-          (stageHeight / 6) * y - lineWidth / 2,
-          stageWidth,
-          lineWidth
-        );
-        grid.endFill();
-      }
-      for (let x = 1; x < 12; x++) {
-        grid.beginFill(0x000000);
-        grid.drawRect(
-          (stageWidth / 12) * x - lineWidth / 2,
-          0,
-          lineWidth,
-          stageHeight
-        );
-        grid.endFill();
-      }
-      app.stage.addChild(grid);
-    }
     // スタンバイ初期化
     if (store.text != null) {
       // app.stage.removeChild(store.text);
@@ -232,8 +253,8 @@ function draw() {
     text.y = stageHeight / 2;
     text.pivot.x = text.width / 2;
     text.pivot.y = text.height / 2;
-    text.width = text.width * 1.5;
-    text.height = text.height * 1.5;
+    text.width = text.width * 1.1;
+    text.height = text.height * 1.1;
     text.alpha = 1;
     // app.stage.addChild(text);
     store.l2.addChild(text);
@@ -259,7 +280,8 @@ function draw() {
   } else if (scene == 3) {
     // ドアホンスタンバイ初期化
     scene = 4;
-    store.bgVideo.visible = true;
+    store.bgVideo1.visible = true;
+    store.bgVideo2.visible = true;
   } else if (scene == 4) {
     // ドアホンスタンバイ
     let keyFlag = 0;
@@ -273,33 +295,50 @@ function draw() {
       }
     }
     if (keyFlag == 1) {
-      for (let index = 0; index < texts.length; index++) {
+      for (let index = 0; index < texts1.length; index++) {
         // app.stage.removeChild(texts[index]);
-        store.l2.removeChild(texts[index]);
-        texts[index] = null;
+        store.l1.removeChild(texts1[index]);
+        texts1[index] = null;
       }
-      texts.splice(0);
+      texts1.splice(0);
+      for (let index = 0; index < texts2.length; index++) {
+        // app.stage.removeChild(texts[index]);
+        store.l2.removeChild(texts2[index]);
+        texts2[index] = null;
+      }
+      texts2.splice(0);
       for (let index = 0; index < 30; index++) {
-        const text =
-          sentences[Math.floor(Math.random() * sentences.length)].text();
-        text.x = Math.random() * stageWidth;
-        text.y = Math.random() * stageHeight;
-        text.pivot.x = text.width / 2;
-        text.pivot.y = text.height / 2;
-        text.alpha = 0;
-        // app.stage.addChild(text);
-        store.l2.addChild(text);
-        const tl = GSAP.timeline();
-        tl.to(text, { alpha: 1, duration: 0, delay: Math.random() * 1 }).to(
-          text,
-          {
+        const sId = Math.floor(Math.random() * sentences.length);
+        const texts = [sentences[sId].text(), sentences[sId].text()];
+        const textX = Math.random() * stageWidth;
+        const textY = Math.random() * stageHeight;
+        const delaySec = Math.random() * 1;
+        for (let index = 0; index < texts.length; index++) {
+          texts[index].x = textX;
+          texts[index].y = textY;
+          texts[index].pivot.x = texts[index].width / 2;
+          texts[index].pivot.y = texts[index].height / 2;
+          texts[index].alpha = 0;
+          const tl = GSAP.timeline();
+          tl.to(texts[index], {
+            alpha: 1,
+            duration: 0,
+            delay: delaySec,
+          }).to(texts[index], {
             ease: "power4.out",
             alpha: 0,
             duration: 3.0,
+          });
+          if (index === 0) {
+            store.l1.addChild(texts[index]);
+            texts1.push(texts[index]);
+          } else if ((index = 1)) {
+            store.l2.addChild(texts[index]);
+            texts2.push(texts[index]);
           }
-        );
-        texts.push(text);
-        store.bgVideo.visible = false;
+        }
+        store.bgVideo1.visible = false;
+        store.bgVideo2.visible = false;
       }
       window.setTimeout(() => (scene = 5), 4000);
     }

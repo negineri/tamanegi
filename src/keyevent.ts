@@ -17,7 +17,7 @@ window.addEventListener(
 );
 
 export let keyFlag = 0;
-export let camNum = 1;
+export let camNum = 0;
 
 function downHandler(e: KeyboardEvent) {
   switch (e.key) {
@@ -26,6 +26,12 @@ function downHandler(e: KeyboardEvent) {
       break;
     case "0":
       camNum = 0;
+      break;
+    case "1":
+      camNum = 1;
+      break;
+    case "2":
+      camNum = 2;
       break;
   }
 }
