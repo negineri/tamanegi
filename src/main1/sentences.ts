@@ -46,7 +46,7 @@ export class Sentence {
       .reverse()
       .forEach((vLine) => {
         const text = new PIXI.Text(vLine, this.style);
-        text.x = result.width;
+        text.x = result.width == 0 ? 0 : result.width + 10;
         result.addChild(text);
       });
     return result;

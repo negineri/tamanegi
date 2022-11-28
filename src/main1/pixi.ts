@@ -9,10 +9,6 @@ import { SentencesJSON, loadSentences, Sentence } from "./sentences";
 import { WebfontLoaderPlugin } from "pixi-webfont-loader";
 import bizudpmincho from "assets/BIZUDPMincho-Regular.ttf";
 import bgVideo from "assets/video.mp4";
-import cv, {
-  CameraHelper,
-  EmscriptenEmbindInstance,
-} from "@techstark/opencv-js";
 import { loadDataFile } from "src/cvDataFile";
 import haarcascade_frontalface_default from "assets/haarcascade_frontalface_default.xml";
 import haarcascade_eye from "assets/haarcascade_eye.xml";
@@ -44,21 +40,21 @@ bgVideoResource.source.loop = true;
 app.ticker.stop();
 
 // Global
-let drawing = false;
-let graphic: PIXI.Graphics = null;
-let count = 0;
+const drawing = false;
+const graphic: PIXI.Graphics = null;
+const count = 0;
 
-let xIni = 0;
-let yIni = 0;
+const xIni = 0;
+const yIni = 0;
 let sentences: Sentence[];
 let nextMs = 0;
 const intervalMs = 400;
 const texts1: PIXI.Container[] = [];
 const texts2: PIXI.Container[] = [];
 let scene = 0;
-let flags = { tracking: true, detect: false };
+const flags = { tracking: true, detect: false };
 let centralText: PIXI.Container;
-let pScale: number[] = [];
+const pScale: number[] = [];
 const cMask = new PIXI.Graphics();
 cMask.lineStyle(0); // draw a circle, set the lineStyle to zero so the circle doesn't have an outline
 cMask.beginFill(0x000000, 1);
@@ -90,6 +86,7 @@ const store: DataStore = {
   l2: new PIXI.Container(),
   mask: cMask,
 };
+store.l1.alpha = 0.95;
 app.stage.addChild(store.l1);
 app.stage.addChild(store.l1_5);
 app.stage.addChild(store.l2);
@@ -157,17 +154,21 @@ const setupCamera = async (
     const cameraSprite = new PIXI.Sprite(cameraTexture);
     const scale = stageWidth / canvas.width;
     cameraSprite.scale.set(scale, scale);
-    let camSCount = 0;
     // app.stage.addChild(cameraSprite);
     ticker.add(() => {
       if (!flags.tracking) {
         return;
       }
       bufferCtx.drawImage(video, 0, 0);
-      let imageData = bufferCtx.getImageData(0, 0, buffer.width, buffer.height);
-      let nScale: number[] = [];
+      const imageData = bufferCtx.getImageData(
+        0,
+        0,
+        buffer.width,
+        buffer.height
+      );
+      const nScale: number[] = [];
       let diffScore = 0;
-      for (var i = 0; i < imageData.data.length / 4; i++) {
+      for (let i = 0; i < imageData.data.length / 4; i++) {
         const scale = Math.floor(
           (imageData.data[i * 4] +
             imageData.data[i * 4 + 1] +
@@ -240,7 +241,8 @@ function draw() {
   app.stage.scale.set(scale, scale);
   app.stage.position.y = (app.view.height - stageHeight * scale) / 2;
   if (scene == 0) {
-    scene = 1;
+    scene = -1;
+    window.setTimeout(() => (scene = 1), 10000);
     console.log("scene 0");
     // スタンバイ初期化
     if (store.text != null) {
@@ -253,8 +255,8 @@ function draw() {
     text.y = stageHeight / 2;
     text.pivot.x = text.width / 2;
     text.pivot.y = text.height / 2;
-    text.width = text.width * 1.1;
-    text.height = text.height * 1.1;
+    text.width = text.width * 1.0;
+    text.height = text.height * 1.0;
     text.alpha = 1;
     // app.stage.addChild(text);
     store.l2.addChild(text);
@@ -295,6 +297,8 @@ function draw() {
       }
     }
     if (keyFlag == 1) {
+      scene = -1;
+      window.setTimeout(() => (scene = 0), 4000);
       for (let index = 0; index < texts1.length; index++) {
         // app.stage.removeChild(texts[index]);
         store.l1.removeChild(texts1[index]);
@@ -307,12 +311,12 @@ function draw() {
         texts2[index] = null;
       }
       texts2.splice(0);
-      for (let index = 0; index < 30; index++) {
+      for (let index = 0; index < 80; index++) {
         const sId = Math.floor(Math.random() * sentences.length);
         const texts = [sentences[sId].text(), sentences[sId].text()];
         const textX = Math.random() * stageWidth;
         const textY = Math.random() * stageHeight;
-        const delaySec = Math.random() * 1;
+        const delaySec = Math.random() * 3;
         for (let index = 0; index < texts.length; index++) {
           texts[index].x = textX;
           texts[index].y = textY;
@@ -332,7 +336,7 @@ function draw() {
           if (index === 0) {
             store.l1.addChild(texts[index]);
             texts1.push(texts[index]);
-          } else if ((index = 1)) {
+          } else if (index === 1) {
             store.l2.addChild(texts[index]);
             texts2.push(texts[index]);
           }
@@ -340,10 +344,7 @@ function draw() {
         store.bgVideo1.visible = false;
         store.bgVideo2.visible = false;
       }
-      window.setTimeout(() => (scene = 5), 4000);
     }
-  } else if (scene == 5) {
-    scene = 0;
   }
 }
 
