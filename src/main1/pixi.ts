@@ -9,6 +9,7 @@ import { SentencesJSON, loadSentences, Sentence } from "./sentences";
 import { WebfontLoaderPlugin } from "pixi-webfont-loader";
 import bizudpmincho from "assets/BIZUDPMincho-Regular.ttf";
 import bgVideo from "assets/video.mp4";
+import cv from "@techstark/opencv-js";
 import { loadDataFile } from "src/cvDataFile";
 import haarcascade_frontalface_default from "assets/haarcascade_frontalface_default.xml";
 import haarcascade_eye from "assets/haarcascade_eye.xml";
